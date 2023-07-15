@@ -17,18 +17,7 @@ report 50000 "TKA Replace Doc. Attachment"
             begin
                 DocumentAttachment.SetRange("File Name", FileName);
                 DocumentAttachment.SetRange("File Type", DocumentAttachmentFileType);
-                DocumentAttachment.SetFilter("Table ID",
-                    '<>%1&<>%2&<>%3&<>%4&<>%5&<>%6&<>%7&<>%8&<>%9&<>%10&<>%11&<>%12&<>%13&<>%14&<>%15&<>%16&<>%17&<>%18&<>%19&<>%20',
-                    Database::"Sales Invoice Header", Database::"Sales Invoice Line",
-                    Database::"Sales Shipment Header", Database::"Sales Shipment Line",
-                    Database::"Sales Cr.Memo Header", Database::"Sales Cr.Memo Line",
-                    Database::"Return Receipt Header", Database::"Return Receipt Line",
-                    Database::"Purch. Inv. Header", Database::"Purch. Inv. Line",
-                    Database::"Purch. Rcpt. Header", Database::"Purch. Rcpt. Line",
-                    Database::"Purch. Cr. Memo Hdr.", Database::"Purch. Cr. Memo Line",
-                    Database::"Return Shipment Header", Database::"Return Shipment Line",
-                    Database::"Cust. Ledger Entry", Database::"Vendor Ledger Entry", Database::"G/L Entry", Database::"VAT Entry"
-                );
+                DocumentAttachment.SetFilter("Table ID", GetExcludedTablesFilter());
 
                 NoOfFilesToReplace := DocumentAttachment.Count();
                 if NoOfFilesToReplace = 0 then
@@ -113,4 +102,46 @@ report 50000 "TKA Replace Doc. Attachment"
         NewAttachmentTempBlob: Codeunit "Temp Blob";
         FileName, ReplaceByFileName : Text;
         DocumentAttachmentFileType: Enum "Document Attachment File Type";
+
+    local procedure GetExcludedTablesFilter(): Text
+    var
+        ExcludedTables: List of [Integer];
+        ExcludedTablesFilterTextBuilder: TextBuilder;
+        ExcludedTable: Integer;
+        ExcludedTablesFilterTok: Label '<>%1', Locked = true;
+    begin
+        ExcludedTables.Add(Database::"Sales Invoice Header");
+        ExcludedTables.Add(Database::"Sales Invoice Line");
+        ExcludedTables.Add(Database::"Sales Shipment Header");
+        ExcludedTables.Add(Database::"Sales Shipment Line");
+        ExcludedTables.Add(Database::"Sales Cr.Memo Header");
+        ExcludedTables.Add(Database::"Sales Cr.Memo Line");
+        ExcludedTables.Add(Database::"Return Receipt Header");
+        ExcludedTables.Add(Database::"Return Receipt Line");
+        ExcludedTables.Add(Database::"Purch. Inv. Header");
+        ExcludedTables.Add(Database::"Purch. Inv. Line");
+        ExcludedTables.Add(Database::"Purch. Rcpt. Header");
+        ExcludedTables.Add(Database::"Purch. Rcpt. Line");
+        ExcludedTables.Add(Database::"Purch. Cr. Memo Hdr.");
+        ExcludedTables.Add(Database::"Purch. Cr. Memo Line");
+        ExcludedTables.Add(Database::"Return Shipment Header");
+        ExcludedTables.Add(Database::"Return Shipment Line");
+        ExcludedTables.Add(Database::"Cust. Ledger Entry");
+        ExcludedTables.Add(Database::"Vendor Ledger Entry");
+        ExcludedTables.Add(Database::"G/L Entry");
+        ExcludedTables.Add(Database::"VAT Entry");
+        OnGetExcludedTablesFilterAfterCreateListOfExcludedTables(ExcludedTables);
+
+        foreach ExcludedTable in ExcludedTables do begin
+            if ExcludedTablesFilterTextBuilder.Length() <> 0 then
+                ExcludedTablesFilterTextBuilder.Append('&');
+            ExcludedTablesFilterTextBuilder.Append(StrSubstNo(ExcludedTablesFilterTok, ExcludedTable));
+        end;
+        exit(ExcludedTablesFilterTextBuilder.ToText());
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnGetExcludedTablesFilterAfterCreateListOfExcludedTables(var ExcludedTables: List of [Integer])
+    begin
+    end;
 }
