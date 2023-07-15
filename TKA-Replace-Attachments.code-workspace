@@ -1,0 +1,19 @@
+{
+    "folders": [
+        {
+            "path": "App"
+        },
+        {
+            "path": "Test"
+        },
+        {
+            "path": "Scripts"
+        },
+        {
+            "path": ".azureDevOps"
+        }
+    ],
+    "settings": {
+        "al.packageCachePath": ".\\.alpackages",
+    }
+}
